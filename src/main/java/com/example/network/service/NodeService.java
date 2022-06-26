@@ -6,9 +6,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * @author: modige
- * @date: 2022/5/12 22:10
- * @description:
+ * &#064;author:  modige
+ * &#064;date:  2022/5/12 22:10
+ * &#064;description:
  */
 @Service
 public interface NodeService {

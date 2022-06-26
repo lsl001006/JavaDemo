@@ -4,9 +4,9 @@ import com.alibaba.fastjson.JSONObject;
 import lombok.Data;
 
 /**
- * @author: modige
- * @date: 2022/5/12 22:25
- * @description:
+ * &#064;author:  modige
+ * &#064;date:  2022/5/12 22:25
+ * &#064;description:
  */
 @Data
 

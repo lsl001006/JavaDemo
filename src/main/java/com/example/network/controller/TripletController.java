@@ -20,9 +20,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author: modige
- * @date: 2022/5/6 0:12
- * @description:控制三元组的展示与增删改查
+ * &#064;author:  modige
+ * &#064;date:  2022/5/6 0:12
+ * &#064;description:控制三元组的展示与增删改查
  */
 @RestController
 public class TripletController {
@@ -38,7 +38,7 @@ public class TripletController {
     private EntityService entityService;
 
 
-    @RequestMapping(value = "triplets")
+    @RequestMapping(value = "triplets") //测试语句
     public JSONArray getAllTriples(){
 
         JSONArray keyLinks = new JSONArray();
@@ -62,7 +62,7 @@ public class TripletController {
         ArrayList<String> target = (ArrayList<String>)triplet.get("target");
 //        System.out.println(source);
 //        System.out.println(target);
-        System.out.println(triplet.get("id").toString());
+//        System.out.println(triplet.get("id").toString());
 
 
         tripletService.addTriplet(source.get(1),triplet.get("value").toString(),target.get(1));
