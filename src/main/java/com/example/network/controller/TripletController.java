@@ -62,7 +62,7 @@ public class TripletController {
         ArrayList<String> target = (ArrayList<String>)triplet.get("target");
 //        System.out.println(source);
 //        System.out.println(target);
-//        System.out.println(triplet.get("id").toString());
+        System.out.println(triplet.get("id").toString());
 
 
         tripletService.addTriplet(source.get(1),triplet.get("value").toString(),target.get(1));
@@ -145,8 +145,7 @@ public class TripletController {
     @GetMapping("/triplets/{page}/{size}")
     public List<Triplet> findAll(@PathVariable("page") Integer page, @PathVariable("size") Integer size){
 
-        List<Triplet> triplets = tripletService.selectPage(page,size);
-        return triplets;
+        return tripletService.selectPage(page,size);
     }
 
 
@@ -176,33 +175,30 @@ public class TripletController {
     @RequestMapping(value = "/l",method = RequestMethod.GET)
     public JSONObject linksJson(){
         File file = new File("E:\\oneDrive\\桌面\\前端\\network-test\\src\\main\\resources\\static\\link_detail.json");
-        String ans = "";
+        StringBuilder ans = new StringBuilder();
         try {
             BufferedReader br = new BufferedReader(new FileReader(file));
-            String line = null;
+            String line;
 
             while ((line = br.readLine()) != null) {
                 if(line.length()!=0)
-                    ans+=line;
+                    ans.append(line);
             }
         }
         catch (Exception e){
             System.out.println(e);
         }
-        finally {
-        }
+
 
         try {
-            JSONObject j = JSONObject.parseObject(ans);
+            JSONObject j = JSONObject.parseObject(ans.toString());
             System.out.println("取值成功");
             return j;
         }
         catch (Exception e){
             System.out.println(e);
         }
-        finally {
 
-        }
         return null;
 
     }
@@ -214,14 +210,14 @@ public class TripletController {
             String path = "E:\\oneDrive\\桌面\\前端\\network-test\\src\\main\\resources\\static\\link_detail.json";
 
             File file = new File(path);
-            String ans = "";
+            StringBuilder ans = new StringBuilder();
             try {
                 BufferedReader br = new BufferedReader(new FileReader(file));
-                String line = null;
+                String line;
 
                 while ((line = br.readLine()) != null) {
                     if(line.length()!=0)
-                        ans+=line;
+                        ans.append(line);
                 }
             }
             catch (Exception e){
@@ -229,12 +225,12 @@ public class TripletController {
             }
 
             //存放整个文档
-            JSONObject j =  JSONObject.parseObject(ans);
+            JSONObject j =  JSONObject.parseObject(ans.toString());
 
             JSONArray items = (JSONArray)j.get("links");
 
-            for (int i=0;i<items.size();i++){
-                JSONObject n = (JSONObject)items.get(i);
+            for (Object item : items) {
+                JSONObject n = (JSONObject) item;
                 Triplet triplet = new Triplet();
                 triplet.setSource(n.get("source").toString());
                 triplet.setValue(n.get("value").toString());
