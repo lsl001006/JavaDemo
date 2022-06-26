@@ -5,9 +5,8 @@ import lombok.Data;
 
 
 /**
- * &#064;author:  modige
- * &#064;date:  2022/5/12 22:07
- * &#064;description:
+ * @author 19586
+ * @date 2022/6/26 23:58
  */
 @Data
 public class Node {
