@@ -47,10 +47,10 @@ public class EntityServiceImpl implements EntityService {
     }
 
     @Override
-    public void addEntity(String a,String b,String c,String d,String e,String f, Integer node_group) {
+    public void addEntity(String a,String b,String c,String d,String e,String f) {
         entityMapper.addEntity(a, b, c, d, e, f);
-        entityMapper.addNode(b);//添加实体对应的node
-        entityMapper.updateNodeGroup(b,node_group); //更新node group
+//        entityMapper.addNode(b);//添加实体对应的node
+//        entityMapper.updateNodeGroup(b,node_group); //更新node group
         System.out.println("Complete");
     }
 

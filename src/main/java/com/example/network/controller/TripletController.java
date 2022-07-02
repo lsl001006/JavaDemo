@@ -16,6 +16,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +38,66 @@ public class TripletController {
     @Autowired
     private EntityService entityService;
 
+    public Integer mapLookUp(String label){
+        Map<String, Integer> labelmap = new HashMap<String, Integer>();
+        labelmap.put("中文名称",0);
+        labelmap.put("协议",1);
+        labelmap.put("信道",2);
+        labelmap.put("标识符",3);
+        labelmap.put("设备",4);
+        labelmap.put("控制",5);
+        labelmap.put("功能",6);
+        labelmap.put("网络",7);
+        labelmap.put("终端",8);
+        labelmap.put("信号",9);
+        labelmap.put("电路",10);
+        labelmap.put("英文缩写",11);
+        labelmap.put("模块",12);
+        labelmap.put("服务",13);
+        labelmap.put("接口",14);
+        labelmap.put("网关",15);
+        labelmap.put("消息",16);
+        labelmap.put("系统",17);
+        labelmap.put("模式",18);
+        labelmap.put("标识",19);
+        labelmap.put("业务",20);
+        labelmap.put("数据",21);
+        labelmap.put("路由器",22);
+        labelmap.put("英文名称",23);
+        labelmap.put("参数",24);
+        labelmap.put("default",25);
+        labelmap.put("术语",26);
+        labelmap.put("协",27);
+
+        return labelmap.get(label);
+    }
+
+    public void checkNodeAndUpdate(String name) {
+        //用于检查nodes表中是否存在所需name的node
+        //导入entities, nodes 两个表中的全部内容
+        List<Entity> entities = entityService.selectAllEntities();
+        List<Node> nodes = nodeService.selectAllNodes();
+        Boolean hasNode = false;
+        for (Entity entity : entities) {
+            if (entity.getName().equals(name)) {
+                // 查找nodes表中是否有name这个名称的node
+                for (Node node : nodes) {
+                    if (node.getName().equals(name)) {
+                        //若存在，则终止添加操作
+                        hasNode = true;
+                    }
+                }
+                if (!hasNode) {
+                    String label = entity.getLabel();
+                    Integer node_group = mapLookUp(label);
+                    nodeService.addNode(entity.getName());
+                    nodeService.updateNodeGroup(entity.getName(), node_group);
+                }
+                break;
+            }
+        }
+    }
+
 
     @RequestMapping(value = "triplets") //测试语句
     public JSONArray getAllTriples(){
@@ -52,21 +113,26 @@ public class TripletController {
     }
 
 
-
     @PostMapping("/addTriplet") //添加三元组
-    public Triplet addTriplet(@RequestBody Map<String,JSONObject> map){
+    public void addTriplet(@RequestBody Map<String,JSONObject> map){
 
         JSONObject triplet = map.get("form");
-//        System.out.println(triplet.get("source"));
+
+
         ArrayList<String> source = (ArrayList<String>) triplet.get("source");
-        ArrayList<String> target = (ArrayList<String>)triplet.get("target");
-//        System.out.println(source);
-//        System.out.println(target);
+        ArrayList<String> target = (ArrayList<String>) triplet.get("target");
+
         System.out.println(triplet.get("id").toString());
 
 
-        tripletService.addTriplet(source.get(1),triplet.get("value").toString(),target.get(1));
-        return new Triplet();
+            //首先检查source中选择的实体是否在图中存在node,若没有，则新建对应的node
+            checkNodeAndUpdate(source.get(1));
+            //其次检查target中选择的实体是否在图中存在node,若没有，则新建对应的node
+            checkNodeAndUpdate(target.get(1));
+
+
+        tripletService.addTriplet(source.get(1), triplet.get("value").toString(), target.get(1));
+//        return new Triplet();
     }
 
 
@@ -109,10 +175,11 @@ public class TripletController {
         return res;
     }
 
-    @PostMapping("/delTripletsByIds")//批量删除三元组 TODO
-    public String delTripletsByIds(@RequestBody List<Integer> ids){
-        System.out.println("Triplets to Delete:"+ids.toString());
-        for (int id:ids){
+    @PostMapping("/batchDeleteTriplet")//批量删除三元组 TODO
+    public String delTripletsByIds(@RequestBody Map<String, List<Integer>> ids){
+        List<Integer> ids2 = ids.get("ids");
+        System.out.println("Triplets to Delete:"+ids2.toString());
+        for (int id:ids2){
             Triplet tri = tripletService.selectById(id);
             tripletService.deleteById(id, tri.target);
         }

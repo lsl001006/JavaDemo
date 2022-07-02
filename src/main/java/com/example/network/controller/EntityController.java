@@ -26,39 +26,39 @@ public class EntityController {
     private EntityService entityService;
     @Autowired
     private TripletService tripletService;
-    public Integer mapLookUp(String label){
-        Map<String, Integer> labelmap = new HashMap<String, Integer>();
-        labelmap.put("中文名称",0);
-        labelmap.put("协议",1);
-        labelmap.put("信道",2);
-        labelmap.put("标识符",3);
-        labelmap.put("设备",4);
-        labelmap.put("控制",5);
-        labelmap.put("功能",6);
-        labelmap.put("网络",7);
-        labelmap.put("终端",8);
-        labelmap.put("信号",9);
-        labelmap.put("电路",10);
-        labelmap.put("英文缩写",11);
-        labelmap.put("模块",12);
-        labelmap.put("服务",13);
-        labelmap.put("接口",14);
-        labelmap.put("网关",15);
-        labelmap.put("消息",16);
-        labelmap.put("系统",17);
-        labelmap.put("模式",18);
-        labelmap.put("标识",19);
-        labelmap.put("业务",20);
-        labelmap.put("数据",21);
-        labelmap.put("路由器",22);
-        labelmap.put("英文名称",23);
-        labelmap.put("参数",24);
-        labelmap.put("default",25);
-        labelmap.put("术语",26);
-        labelmap.put("协",27);
-
-        return labelmap.get(label);
-    }
+//    public Integer mapLookUp(String label){
+//        Map<String, Integer> labelmap = new HashMap<String, Integer>();
+//        labelmap.put("中文名称",0);
+//        labelmap.put("协议",1);
+//        labelmap.put("信道",2);
+//        labelmap.put("标识符",3);
+//        labelmap.put("设备",4);
+//        labelmap.put("控制",5);
+//        labelmap.put("功能",6);
+//        labelmap.put("网络",7);
+//        labelmap.put("终端",8);
+//        labelmap.put("信号",9);
+//        labelmap.put("电路",10);
+//        labelmap.put("英文缩写",11);
+//        labelmap.put("模块",12);
+//        labelmap.put("服务",13);
+//        labelmap.put("接口",14);
+//        labelmap.put("网关",15);
+//        labelmap.put("消息",16);
+//        labelmap.put("系统",17);
+//        labelmap.put("模式",18);
+//        labelmap.put("标识",19);
+//        labelmap.put("业务",20);
+//        labelmap.put("数据",21);
+//        labelmap.put("路由器",22);
+//        labelmap.put("英文名称",23);
+//        labelmap.put("参数",24);
+//        labelmap.put("default",25);
+//        labelmap.put("术语",26);
+//        labelmap.put("协",27);
+//
+//        return labelmap.get(label);
+//    }
 
 
     @GetMapping(value = "selectByLabel/{label}")//以JSONArray形式返回实体列表
@@ -186,8 +186,8 @@ public class EntityController {
         System.out.println(entity);
 //        System.out.println(entity.getIdentity());
 //        System.out.println("Hello Java!");
-        Integer node_group = mapLookUp(entity.getLabel());
-        entityService.addEntity(entity.getIdentity(),entity.getName(),entity.getLabel(),entity.getChineseName(),entity.getEnglishName(),entity.getAbbreName(),node_group);
+//        Integer node_group = mapLookUp(entity.getLabel());
+        entityService.addEntity(entity.getIdentity(),entity.getName(),entity.getLabel(),entity.getChineseName(),entity.getEnglishName(),entity.getAbbreName());
 
         return "success";
     }

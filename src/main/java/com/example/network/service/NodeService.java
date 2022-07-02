@@ -12,6 +12,9 @@ import java.util.List;
  */
 @Service
 public interface NodeService {
-    void addNode(Node node);
+    void addNode(String node_name);
+
+    void updateNodeGroup(String node_name, Integer node_group);
+
     List<Node> selectAllNodes();
 }

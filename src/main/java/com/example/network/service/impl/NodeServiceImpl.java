@@ -20,13 +20,18 @@ public class NodeServiceImpl implements NodeService {
 
 
     @Override
-    public void addNode(Node node) {
-
+    public void addNode(String node_name) {
+        nodeMapper.addNode(node_name);
     }
 
     @Override
     public List<Node> selectAllNodes() {
         return nodeMapper.selectAllNodes();
+    }
+
+    @Override
+    public void updateNodeGroup(String node_name, Integer node_group){
+        nodeMapper.updateNodeGroup(node_name, node_group);
     }
 
 

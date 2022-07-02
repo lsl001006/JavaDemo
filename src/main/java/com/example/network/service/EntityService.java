@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * &#064;author:  modige
+ * &#064;author:  shanglin
  * &#064;date:  2022/5/12 11:41
  * &#064;description:
  */
@@ -24,7 +24,7 @@ public interface EntityService {
 
     List<String> selectEntityIds();
 
-    void addEntity(String a,String b,String c,String d,String e,String f, Integer node_group);
+    void addEntity(String a,String b,String c,String d,String e,String f);
 
     void editEntity(String a,String b,String c,String d,String e,String f);
 
