@@ -13,8 +13,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author: modige
- * @date: 2022/5/12 22:28
+ * @author: lishanglin
+ * @date: 2022/7/12 19:04
  * @description:
  */
 @Service
@@ -23,15 +23,10 @@ public class TripletServiceImpl implements TripletService {
     @Autowired
     private TripletMapper tripletMapper;
 
-
     @Override
     public List<Triplet> selectAll() {
         return tripletMapper.selectAll();
     }
-
-
-
-
 
     @Override
     public List<Triplet> selectPage(int pageNum, int pageSize) {

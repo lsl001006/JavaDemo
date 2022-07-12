@@ -47,16 +47,14 @@ public class EntityServiceImpl implements EntityService {
     }
 
     @Override
-    public void addEntity(String a,String b,String c,String d,String e,String f) {
-        entityMapper.addEntity(a, b, c, d, e, f);
-//        entityMapper.addNode(b);//添加实体对应的node
-//        entityMapper.updateNodeGroup(b,node_group); //更新node group
+    public void addEntity(String identity,String name,String label,String chineseName,String englishName,String abbreName) {
+        entityMapper.addEntity(identity, name, label, chineseName, englishName, abbreName);
         System.out.println("Complete");
     }
 
     @Override
-    public void editEntity(String a, String b, String c, String d, String e, String f) {
-        entityMapper.editEntity(a,b,c,d,e,f);
+    public void editEntity(String identity,String name,String label,String chineseName,String englishName,String abbreName) {
+        entityMapper.editEntity(identity, name, label, chineseName, englishName, abbreName);
     }
 
     @Override

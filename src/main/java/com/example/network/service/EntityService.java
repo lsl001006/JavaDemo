@@ -24,9 +24,9 @@ public interface EntityService {
 
     List<String> selectEntityIds();
 
-    void addEntity(String a,String b,String c,String d,String e,String f);
+    void addEntity(String identity,String name,String label,String chineseName,String englishName,String abbreName);
 
-    void editEntity(String a,String b,String c,String d,String e,String f);
+    void editEntity(String identity,String name,String label,String chineseName,String englishName,String abbreName);
 
     void deleteEntity(String id);
 }

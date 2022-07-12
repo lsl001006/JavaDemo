@@ -37,9 +37,6 @@ public class Entity {
         this.setAbbreName(abbreName);
     }
 
-    public Entity() {
-
-    }
 
     public JSONObject toJSON(){
         JSONObject ans = new JSONObject();

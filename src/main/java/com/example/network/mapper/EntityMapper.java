@@ -57,14 +57,14 @@ public interface EntityMapper {
     @Select("select entity_id from entities")
     List<String> selectEntityIds();
 
-    @Insert("insert into entities values(#{a},#{b},#{c},#{d},#{e},#{f})")
-    void addEntity(String a,String b,String c,String d,String e,String f);
+    @Insert("insert into entities values(#{identity},#{name},#{label},#{chineseName},#{englishName},#{abbreName})")
+    void addEntity(String identity,String name,String label,String chineseName,String englishName,String abbreName);
 
     @Insert("insert into nodes values(#{node_name}, 0, 1, #{node_name})")
     void addNode(String node_name);
 
-    @Update("update entities set values(#{a},#{b},#{c},#{d},#{e},#{f}) where entity_id = #{s}")
-    void editEntity(String a,String b,String c,String d,String e,String f);
+    @Update("update entities set entity_name = #{name}, entity_label = #{label}, entity_chinese = #{chineseName}, entity_english = #{englishName}, entity_abbre = #{abbreName} where entity_id = #{identity}")
+    void editEntity(String identity,String name,String label,String chineseName,String englishName,String abbreName);
 
     @Delete("delete from entities where entity_id = #{id}")
     void deleteEntity(String id);

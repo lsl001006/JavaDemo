@@ -117,39 +117,37 @@ public class TripletController {
     public void addTriplet(@RequestBody Map<String,JSONObject> map){
 
         JSONObject triplet = map.get("form");
-
-
         ArrayList<String> source = (ArrayList<String>) triplet.get("source");
         ArrayList<String> target = (ArrayList<String>) triplet.get("target");
+        String source_name = source.get(1);
+        String target_name = target.get(1);
 
         System.out.println(triplet.get("id").toString());
 
+        //首先检查source中选择的实体是否在图中存在node,若没有，则新建对应的node
+        checkNodeAndUpdate(source_name);
+        //其次检查target中选择的实体是否在图中存在node,若没有，则新建对应的node
+        checkNodeAndUpdate(target_name);
 
-            //首先检查source中选择的实体是否在图中存在node,若没有，则新建对应的node
-            checkNodeAndUpdate(source.get(1));
-            //其次检查target中选择的实体是否在图中存在node,若没有，则新建对应的node
-            checkNodeAndUpdate(target.get(1));
-
-
-        tripletService.addTriplet(source.get(1), triplet.get("value").toString(), target.get(1));
-//        return new Triplet();
+        tripletService.addTriplet(source_name, triplet.get("value").toString(), target_name);
     }
 
-
     @PostMapping("/updateTriplet")
-    public Triplet updateTriplet(@RequestBody Map<String,JSONObject> map){
+    public void updateTriplet(@RequestBody Map<String,JSONObject> map){
 
         JSONObject triplet = map.get("form");
         System.out.println(triplet.get("source"));
         ArrayList<String> source = (ArrayList<String>) triplet.get("source");
         ArrayList<String> target = (ArrayList<String>)triplet.get("target");
-        System.out.println("Hello Java!");
-        System.out.println(Integer.parseInt(triplet.get("id").toString()));
-        System.out.println("Hello Java2!");
-        tripletService.updateTriplet(Integer.parseInt(triplet.get("id").toString()),source.get(1),triplet.get("value").toString(),target.get(1));
+        String source_name = source.get(1);
+        String target_name = target.get(1);
 
-        return new Triplet();
+        tripletService.updateTriplet(Integer.parseInt(triplet.get("id").toString()),
+                                    source_name,
+                                    triplet.get("value").toString(),
+                                    target_name);
     }
+
     @GetMapping("/selTripletById/{id}")
     public JSONObject selectById(@PathVariable("id") Integer id){
         Triplet triplet = tripletService.selectById(id);
@@ -269,8 +267,6 @@ public class TripletController {
         return null;
 
     }
-
-
 
         @RequestMapping(value = "addtri")
         public String addAll(){
