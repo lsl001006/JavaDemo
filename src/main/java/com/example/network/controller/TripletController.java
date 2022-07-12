@@ -39,7 +39,7 @@ public class TripletController {
     private EntityService entityService;
 
     public Integer mapLookUp(String label){
-        Map<String, Integer> labelmap = new HashMap<String, Integer>();
+        Map<String, Integer> labelmap = new HashMap<>();
         labelmap.put("中文名称",0);
         labelmap.put("协议",1);
         labelmap.put("信道",2);
@@ -77,7 +77,7 @@ public class TripletController {
         //导入entities, nodes 两个表中的全部内容
         List<Entity> entities = entityService.selectAllEntities();
         List<Node> nodes = nodeService.selectAllNodes();
-        Boolean hasNode = false;
+        boolean hasNode = false;
         for (Entity entity : entities) {
             if (entity.getName().equals(name)) {
                 // 查找nodes表中是否有name这个名称的node
@@ -271,7 +271,6 @@ public class TripletController {
         @RequestMapping(value = "addtri")
         public String addAll(){
             String path = "E:\\oneDrive\\桌面\\前端\\network-test\\src\\main\\resources\\static\\link_detail.json";
-
             File file = new File(path);
             StringBuilder ans = new StringBuilder();
             try {
