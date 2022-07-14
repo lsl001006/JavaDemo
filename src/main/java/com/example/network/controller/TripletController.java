@@ -131,6 +131,7 @@ public class TripletController {
         tripletService.addTriplet(source_name, triplet.get("value").toString(), target_name);
     }
 
+
     @PostMapping("/updateTriplet")
     public void updateTriplet(@RequestBody Map<String,JSONObject> map){
 
