@@ -268,6 +268,7 @@ public class TripletController {
 
     }
 
+
         @RequestMapping(value = "addtri")
         public String addAll(){
             String path = "E:\\oneDrive\\桌面\\前端\\network-test\\src\\main\\resources\\static\\link_detail.json";
