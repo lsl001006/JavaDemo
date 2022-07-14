@@ -31,7 +31,6 @@ public class TripletController {
     @Autowired
     private TripletService tripletService;
 
-
     @Autowired
     private NodeService nodeService;
 
