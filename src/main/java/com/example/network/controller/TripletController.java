@@ -28,7 +28,6 @@ public class TripletController {
     @Autowired
     private TripletService tripletService;
 
-
     @Autowired
     private NodeService nodeService;
 
@@ -131,6 +130,7 @@ public class TripletController {
 
         tripletService.addTriplet(source_name, triplet.get("value").toString(), target_name);
     }
+
 
     @PostMapping("/updateTriplet")
     public void updateTriplet(@RequestBody Map<String,JSONObject> map){
@@ -300,12 +300,8 @@ public class TripletController {
                 triplet.setTarget(n.get("target").toString());
 //                tripletService.addTriplet(triplet);
 
-
                 System.out.println(triplet);
             }
-
-
-
 
             return "插入成功";
         }
@@ -331,13 +327,11 @@ public class TripletController {
         String input_data = new String(b);
 
         String[] lines = input_data.split("\\r?\\n");//将输入数据按照换行符分行
-        List<List> result = new ArrayList<List>();
         List<String> problem_source = new ArrayList<String>();
         List<String> problem_target = new ArrayList<String>();
         List<List> problem_source_target = new ArrayList<List>();
         for (String line:lines){
             List<Entity> entities = entityService.selectAllEntities();
-            List<Node> nodes = nodeService.selectAllNodes();
 
             List<String> a = Arrays.asList(line.split(","));//将数据转换为list，并根据"，"切割
             String triplet_source = a.get(0);
@@ -348,21 +342,17 @@ public class TripletController {
             boolean has_source = false;
             boolean has_target = false;
             for (Entity entity:entities){
-                System.out.println(triplet_source_f + entity.getName());
                 if (entity.getName().equals(triplet_source_ff)){
-                    System.out.println(1);
                     has_source = true;
                 }
                 if (entity.getName().equals(triplet_target)){
-                    System.out.println(2);
                     has_target = true;
                 }
-
             }
             if (has_source & has_target){
                 addTriplet_in_Batch(triplet_source_ff,triplet_relation,triplet_target);
             }
-            System.out.println(has_source);
+
             if (!has_source){
                 problem_source.add(triplet_source_f);
             }
@@ -371,6 +361,8 @@ public class TripletController {
             }
 
         }
+        System.out.println("不存在的头实体"+problem_source);
+        System.out.println("不存在的尾实体"+problem_target);
         problem_source_target.add(problem_source);
         problem_source_target.add(problem_target);
         System.out.println(problem_source_target);
