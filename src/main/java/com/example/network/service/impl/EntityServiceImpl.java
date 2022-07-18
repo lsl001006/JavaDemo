@@ -63,6 +63,10 @@ public class EntityServiceImpl implements EntityService {
 
     }
 
+//    public String Add_Entity_in_Batch(List<List> input){
+//        entityMapper.Add_Entity_in_Batch(input);
+//    }
+
 
 
 
