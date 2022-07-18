@@ -11,14 +11,11 @@ import com.example.network.service.TripletService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.sql.SQLOutput;
+import java.util.*;
 
 /**
  * &#064;author:  modige
@@ -71,6 +68,8 @@ public class TripletController {
         return labelmap.get(label);
     }
 
+
+
     public void checkNodeAndUpdate(String name) {
         //用于检查nodes表中是否存在所需name的node
         //导入entities, nodes 两个表中的全部内容
@@ -94,6 +93,7 @@ public class TripletController {
                 }
                 break;
             }
+
         }
     }
 
@@ -300,13 +300,72 @@ public class TripletController {
                 triplet.setTarget(n.get("target").toString());
 //                tripletService.addTriplet(triplet);
 
-
                 System.out.println(triplet);
             }
 
-
-
-
             return "插入成功";
         }
+    public void addTriplet_in_Batch(String triplet_source,String triplet_relation,String triplet_target){
+
+
+        String source_name = triplet_source;
+        String target_name = triplet_target;
+        String relation = triplet_relation;
+
+        //首先检查source中选择的实体是否在图中存在node,若没有，则新建对应的node
+        checkNodeAndUpdate(source_name);
+        //其次检查target中选择的实体是否在图中存在node,若没有，则新建对应的node
+        checkNodeAndUpdate(target_name);
+
+        tripletService.addTriplet(source_name, relation, target_name);
+    }
+    @PostMapping("/triplet/upload")
+    public List<List> getUpload_triplet_batch(MultipartFile file) throws IOException {
+        InputStream ip = file.getInputStream();
+        byte[] b = new byte[ip.available()];//available()方法可以一次获取全部长度
+        ip.read(b);//把读的内容存入字节数组b中
+        String input_data = new String(b);
+
+        String[] lines = input_data.split("\\r?\\n");//将输入数据按照换行符分行
+        List<String> problem_source = new ArrayList<String>();
+        List<String> problem_target = new ArrayList<String>();
+        List<List> problem_source_target = new ArrayList<List>();
+        for (String line:lines){
+            List<Entity> entities = entityService.selectAllEntities();
+
+            List<String> a = Arrays.asList(line.split(","));//将数据转换为list，并根据"，"切割
+            String triplet_source = a.get(0);
+            String triplet_source_f = triplet_source.replaceAll("(\\r\\n|\\n|\\\\n|\\s)", "");
+            String triplet_source_ff = triplet_source_f.replaceAll("\\p{C}", "");
+            String triplet_relation = a.get(1);
+            String triplet_target = a.get(2);
+            boolean has_source = false;
+            boolean has_target = false;
+            for (Entity entity:entities){
+                if (entity.getName().equals(triplet_source_ff)){
+                    has_source = true;
+                }
+                if (entity.getName().equals(triplet_target)){
+                    has_target = true;
+                }
+            }
+            if (has_source & has_target){
+                addTriplet_in_Batch(triplet_source_ff,triplet_relation,triplet_target);
+            }
+
+            if (!has_source){
+                problem_source.add(triplet_source_f);
+            }
+            if (!has_target){
+                problem_target.add(triplet_target);
+            }
+
+        }
+        System.out.println("不存在的头实体"+problem_source);
+        System.out.println("不存在的尾实体"+problem_target);
+        problem_source_target.add(problem_source);
+        problem_source_target.add(problem_target);
+        System.out.println(problem_source_target);
+        return problem_source_target;
+    }
 }

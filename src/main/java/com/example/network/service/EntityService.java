@@ -29,4 +29,6 @@ public interface EntityService {
     void editEntity(String identity,String name,String label,String chineseName,String englishName,String abbreName);
 
     void deleteEntity(String id);
+
+//    String Add_Entity_in_Batch(List<List> input);
 }
