@@ -155,7 +155,7 @@ public class EntityController {
 
         return "success";
     }
-//    @PostMapping("/triplet/upload")
+
     @PostMapping("/entity/upload")
     public void getUpload_entity_batch(MultipartFile file) throws IOException {
         InputStream ip = file.getInputStream();
@@ -164,7 +164,6 @@ public class EntityController {
         String input_data = new String(b);
 
         String[] lines = input_data.split("\\r?\\n");//将输入数据按照换行符分行
-        List<List> result = new ArrayList<List>();
         for (String line:lines){
             List<String> a = Arrays.asList(line.split(","));//将数据转换为list，并根据"，"切割
             List<String> existEntityIds = entityService.selectEntityIds();
