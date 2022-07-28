@@ -320,7 +320,7 @@ public class TripletController {
         tripletService.addTriplet(source_name, relation, target_name);
     }
     @PostMapping("/triplet/upload")
-    public List<List> getUpload_triplet_batch(MultipartFile file) throws IOException {
+    public JSONObject getUpload_triplet_batch(MultipartFile file) throws IOException {
         InputStream ip = file.getInputStream();
         byte[] b = new byte[ip.available()];//available()方法可以一次获取全部长度
         ip.read(b);//把读的内容存入字节数组b中
@@ -329,7 +329,7 @@ public class TripletController {
         String[] lines = input_data.split("\\r?\\n");//将输入数据按照换行符分行
         List<String> problem_source = new ArrayList<String>();
         List<String> problem_target = new ArrayList<String>();
-        List<List> problem_source_target = new ArrayList<List>();
+
         for (String line:lines){
             List<Entity> entities = entityService.selectAllEntities();
 
@@ -363,9 +363,18 @@ public class TripletController {
         }
         System.out.println("不存在的头实体"+problem_source);
         System.out.println("不存在的尾实体"+problem_target);
-        problem_source_target.add(problem_source);
-        problem_source_target.add(problem_target);
-        System.out.println(problem_source_target);
-        return problem_source_target;
+
+        JSONObject res = new JSONObject();
+        JSONArray prob_src = new JSONArray();
+        JSONArray prob_tail = new JSONArray();
+        for (String s:problem_source){
+            prob_src.add(s);
+        }
+        for (String s:problem_target){
+            prob_tail.add(s);
+        }
+        res.put("head", prob_src);
+        res.put("tail", prob_tail);
+        return res;
     }
 }
