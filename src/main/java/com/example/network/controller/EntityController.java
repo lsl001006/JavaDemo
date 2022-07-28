@@ -28,13 +28,13 @@ public class EntityController {
     @Autowired
     private TripletService tripletService;
 
-    @GetMapping(value = "selectByLabel/{label}")//以JSONArray形式返回实体列表
+    @GetMapping(value = "selectByLabel/{label}")//以JSONArray形式返回实体列表 TODO
     public List<String> getAllEntities(@PathVariable("label") String label){
         List<String> entityNames = entityService.selectEntitiesByLabel(label);
         return entityNames;
     }
 
-    @GetMapping(value = "selectEntityLabels")//以JSONArray形式返回实体列表
+    @GetMapping(value = "selectEntityLabels")//以JSONArray形式返回实体列表 TODO
     public JSONArray getEntityLabels(){
 
         List<String> entityLabels = entityService.selectEntityLabels();
@@ -49,7 +49,7 @@ public class EntityController {
         return res;
     }
 
-    @GetMapping(value = "getEntitiesByLabel")//以JSONArray形式返回实体列表
+    @GetMapping(value = "getEntitiesByLabel")//以JSONArray形式返回实体列表 TODO
     public JSONArray getEntitiesByLabel(){
         List<String> entityLabels = entityService.selectEntityLabels();
         JSONArray res = new JSONArray();
@@ -77,7 +77,7 @@ public class EntityController {
         return res;
     }
 
-    @GetMapping(value = "/entity/{id}")//以JSONArray形式返回实体列表
+    @GetMapping(value = "/entity/{id}")//以JSONArray形式返回实体列表 TODO
     public JSONObject getEntityById(@PathVariable("id") String id){
         Entity entity = entityService.selectById(id);
         List<Triplet> triplets =tripletService.selectByEntity(entity.getName());
@@ -110,10 +110,7 @@ public class EntityController {
             res.add(e);
         return res;
     }
-
-
-
-    @RequestMapping(value = "/e",method = RequestMethod.GET)//以JSONObject返回实体列表
+    @RequestMapping(value = "/e",method = RequestMethod.GET)//以JSONObject返回实体列表 TODO
     public JSONObject entitiesJson(){
         List<Entity> entities = entityService.selectAllEntities();
         JSONObject res = new JSONObject();
