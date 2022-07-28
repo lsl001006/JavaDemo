@@ -21,7 +21,6 @@ public interface TripletService {
     void deleteById(int triplet_id, String triplet_target);
     List<String> selectRelations();
 
-
     void addTriplet(String a,String b,String c);
 
 }

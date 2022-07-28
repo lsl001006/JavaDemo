@@ -17,17 +17,16 @@ public class Entity2 {
 
     private String category;
 
-    private String attrs;
+    private JSONObject attrs;
 
 
-    public Entity2(String id, String name, String label, String category, String attrs){
+    public Entity2(String id, String name, String label, String category, JSONObject attrs){
         this.setId(id);
         this.setName(name);
         this.setLabel(label);
         this.setCategory(category);
         this.setAttrs(attrs);
     }
-
 
     public JSONObject toJSON(){
         JSONObject ans = new JSONObject();

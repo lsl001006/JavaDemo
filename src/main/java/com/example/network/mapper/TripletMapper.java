@@ -49,5 +49,4 @@ public interface TripletMapper {
     @Delete("delete from nodes where node_name = #{node_name}")
     void delNode(String node_name);
 
-
 }

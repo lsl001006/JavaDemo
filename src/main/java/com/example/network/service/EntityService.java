@@ -30,5 +30,5 @@ public interface EntityService {
 
     void deleteEntity(String id);
 
-//    String Add_Entity_in_Batch(List<List> input);
+    List<String> selectAllLabels();
 }

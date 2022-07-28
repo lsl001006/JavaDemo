@@ -14,12 +14,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
-import java.sql.SQLOutput;
 import java.util.*;
 
 /**
- * &#064;author:  modige
- * &#064;date:  2022/5/6 0:12
+ * &#064;author:  lsl
+ * &#064;date:  2022/7/28 12:14
  * &#064;description:控制三元组的展示与增删改查
  */
 @RestController
@@ -34,43 +33,41 @@ public class TripletController {
     @Autowired
     private EntityService entityService;
 
-    public Integer mapLookUp(String label){
-        Map<String, Integer> labelmap = new HashMap<>();
-        labelmap.put("中文名称",0);
-        labelmap.put("协议",1);
-        labelmap.put("信道",2);
-        labelmap.put("标识符",3);
-        labelmap.put("设备",4);
-        labelmap.put("控制",5);
-        labelmap.put("功能",6);
-        labelmap.put("网络",7);
-        labelmap.put("终端",8);
-        labelmap.put("信号",9);
-        labelmap.put("电路",10);
-        labelmap.put("英文缩写",11);
-        labelmap.put("模块",12);
-        labelmap.put("服务",13);
-        labelmap.put("接口",14);
-        labelmap.put("网关",15);
-        labelmap.put("消息",16);
-        labelmap.put("系统",17);
-        labelmap.put("模式",18);
-        labelmap.put("标识",19);
-        labelmap.put("业务",20);
-        labelmap.put("数据",21);
-        labelmap.put("路由器",22);
-        labelmap.put("英文名称",23);
-        labelmap.put("参数",24);
-        labelmap.put("default",25);
-        labelmap.put("术语",26);
-        labelmap.put("协",27);
+    public Integer mapLookUp(String label, String category){
+        // mapLookUp函数重构， 传入参数加入category用于指示所属图谱类别
+        // 同时，node的种类与node_group数值的对应关系由原始的代码定义改为了文本读入的方式，以便更好的维护
+        Map<String, Integer> labelmap;
+        String readString;
+        File jsonFile = new File("src/main/resources/data/nodeLabelMap.json");
+        try {
+            FileReader fileReader = new FileReader(jsonFile);
+            BufferedReader reader = new BufferedReader(fileReader);
+            StringBuilder sb = new StringBuilder();
+            while (true) {
+                int ch = reader.read();
+                if (ch != -1) {
+                    sb.append((char) ch);
+                } else {
+                    break;
+                }
+            }
+            fileReader.close();
+            reader.close();
+            readString = sb.toString();
+        } catch (IOException e) {
+            readString = "";
+        }
 
+        JSONObject jsonObject = JSONObject.parseObject(readString);
+        labelmap = (Map<String, Integer>) jsonObject.get(category);
+        System.out.println(labelmap);
         return labelmap.get(label);
     }
 
 
 
-    public void checkNodeAndUpdate(String name) {
+    public void checkNodeAndUpdate(String name, String category) {
+        // checkNodeAndUpdate函数重构， 传入参数加入category用于指示所属图谱类别 TODO 未完成全部重构
         //用于检查nodes表中是否存在所需name的node
         //导入entities, nodes 两个表中的全部内容
         List<Entity> entities = entityService.selectAllEntities();
@@ -83,11 +80,12 @@ public class TripletController {
                     if (node.getName().equals(name)) {
                         //若存在，则终止添加操作
                         hasNode = true;
+                        break;
                     }
                 }
                 if (!hasNode) {
                     String label = entity.getLabel();
-                    Integer node_group = mapLookUp(label);
+                    Integer node_group = mapLookUp(label, category);
                     nodeService.addNode(entity.getName());
                     nodeService.updateNodeGroup(entity.getName(), node_group);
                 }
@@ -107,28 +105,27 @@ public class TripletController {
 
         for (Triplet triplet:triplets)
             keyLinks.add(triplet.toJSON());
-        System.out.println("Hello");
         return keyLinks;
     }
 
 
     @PostMapping("/addTriplet") //添加三元组
     public void addTriplet(@RequestBody Map<String,JSONObject> map){
-
+    // TODO 待完善，form返回参数需包括category图谱类别参数
         JSONObject triplet = map.get("form");
         ArrayList<String> source = (ArrayList<String>) triplet.get("source");
         ArrayList<String> target = (ArrayList<String>) triplet.get("target");
+        ArrayList<String> relation = (ArrayList<String>) triplet.get("value");
         String source_name = source.get(1);
         String target_name = target.get(1);
-
-        System.out.println(triplet.get("id").toString());
+        String connection = relation.get(0);
 
         //首先检查source中选择的实体是否在图中存在node,若没有，则新建对应的node
-        checkNodeAndUpdate(source_name);
+        checkNodeAndUpdate(source_name, "network");
         //其次检查target中选择的实体是否在图中存在node,若没有，则新建对应的node
-        checkNodeAndUpdate(target_name);
+        checkNodeAndUpdate(target_name, "network");
 
-        tripletService.addTriplet(source_name, triplet.get("value").toString(), target_name);
+        tripletService.addTriplet(source_name, connection, target_name);
     }
 
 
@@ -139,12 +136,14 @@ public class TripletController {
         System.out.println(triplet.get("source"));
         ArrayList<String> source = (ArrayList<String>) triplet.get("source");
         ArrayList<String> target = (ArrayList<String>)triplet.get("target");
+        ArrayList<String> relation = (ArrayList<String>)triplet.get("value");
         String source_name = source.get(1);
         String target_name = target.get(1);
+        String connection = relation.get(0);
 
         tripletService.updateTriplet(Integer.parseInt(triplet.get("id").toString()),
                                     source_name,
-                                    triplet.get("value").toString(),
+                                    connection,
                                     target_name);
     }
 
@@ -173,7 +172,7 @@ public class TripletController {
         return res;
     }
 
-    @PostMapping("/batchDeleteTriplet")//批量删除三元组 TODO
+    @PostMapping("/batchDeleteTriplet")//批量删除三元组 TODO 待完善category参数
     public String delTripletsByIds(@RequestBody Map<String, List<Integer>> ids){
         List<Integer> ids2 = ids.get("ids");
         System.out.println("Triplets to Delete:"+ids2.toString());
@@ -187,6 +186,7 @@ public class TripletController {
 
     @GetMapping("/delTripletById/{id}")
     public String deleteById(@PathVariable("id") Integer id){
+    // 用于删除三元组，传入id即可删除对应的三元组
         System.out.println(id);
         Triplet tri = tripletService.selectById(id);
         tripletService.deleteById(id, tri.target);
@@ -195,7 +195,7 @@ public class TripletController {
 
     @GetMapping("/getRelations")
     public JSONArray getRelations(){
-
+    // 用于获取所有的关系类型
         List<String> relations = tripletService.selectRelations();
         JSONArray res = new JSONArray();
         for (String s:relations){
@@ -209,19 +209,18 @@ public class TripletController {
 
     @GetMapping("/triplets/{page}/{size}")
     public List<Triplet> findAll(@PathVariable("page") Integer page, @PathVariable("size") Integer size){
-
         return tripletService.selectPage(page,size);
     }
 
 
     @RequestMapping(value = "links")
     public JSONObject getAllLinks(){
+        // 每次网页刷新和执行的时候调用，用于将数据库中的数据更新到页面中
         JSONObject res = new JSONObject();
 //        JSONObject keyNodes = new JSONObject();
         JSONArray keyNodes = new JSONArray();
         JSONArray keyLinks = new JSONArray();
         List<Node> nodes = nodeService.selectAllNodes();
-        System.out.println(nodes.size());
         List<Triplet> triplets = tripletService.selectAll();
         for (Node n:nodes){
             int size = n.getSize()/7 + (n.getSize()%7!=0?1:0) ;
@@ -237,98 +236,28 @@ public class TripletController {
         return res;
     }
 
-    @RequestMapping(value = "/l",method = RequestMethod.GET)
-    public JSONObject linksJson(){
-        File file = new File("E:\\oneDrive\\桌面\\前端\\network-test\\src\\main\\resources\\static\\link_detail.json");
-        StringBuilder ans = new StringBuilder();
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(file));
-            String line;
 
-            while ((line = br.readLine()) != null) {
-                if(line.length()!=0)
-                    ans.append(line);
-            }
-        }
-        catch (Exception e){
-            System.out.println(e);
-        }
-
-
-        try {
-            JSONObject j = JSONObject.parseObject(ans.toString());
-            System.out.println("取值成功");
-            return j;
-        }
-        catch (Exception e){
-            System.out.println(e);
-        }
-
-        return null;
-
-    }
-
-
-        @RequestMapping(value = "addtri")
-        public String addAll(){
-            String path = "E:\\oneDrive\\桌面\\前端\\network-test\\src\\main\\resources\\static\\link_detail.json";
-            File file = new File(path);
-            StringBuilder ans = new StringBuilder();
-            try {
-                BufferedReader br = new BufferedReader(new FileReader(file));
-                String line;
-
-                while ((line = br.readLine()) != null) {
-                    if(line.length()!=0)
-                        ans.append(line);
-                }
-            }
-            catch (Exception e){
-                System.out.println(e);
-            }
-
-            //存放整个文档
-            JSONObject j =  JSONObject.parseObject(ans.toString());
-
-            JSONArray items = (JSONArray)j.get("links");
-
-            for (Object item : items) {
-                JSONObject n = (JSONObject) item;
-                Triplet triplet = new Triplet();
-                triplet.setSource(n.get("source").toString());
-                triplet.setValue(n.get("value").toString());
-                triplet.setTarget(n.get("target").toString());
-//                tripletService.addTriplet(triplet);
-
-                System.out.println(triplet);
-            }
-
-            return "插入成功";
-        }
-    public void addTriplet_in_Batch(String triplet_source,String triplet_relation,String triplet_target){
-
-
-        String source_name = triplet_source;
-        String target_name = triplet_target;
-        String relation = triplet_relation;
+    public void addTriplet_in_Batch(String triplet_source,String triplet_relation,String triplet_target, String category){
+        // 批量导入三元组
 
         //首先检查source中选择的实体是否在图中存在node,若没有，则新建对应的node
-        checkNodeAndUpdate(source_name);
+        checkNodeAndUpdate(triplet_source, category);
         //其次检查target中选择的实体是否在图中存在node,若没有，则新建对应的node
-        checkNodeAndUpdate(target_name);
+        checkNodeAndUpdate(triplet_target, category);
 
-        tripletService.addTriplet(source_name, relation, target_name);
+        tripletService.addTriplet(triplet_source, triplet_relation, triplet_target);
     }
     @PostMapping("/triplet/upload")
     public JSONObject getUpload_triplet_batch(MultipartFile file) throws IOException {
+        // TODO 传入category参数，用于区分三元组的图谱类别
         InputStream ip = file.getInputStream();
         byte[] b = new byte[ip.available()];//available()方法可以一次获取全部长度
         ip.read(b);//把读的内容存入字节数组b中
         String input_data = new String(b);
 
         String[] lines = input_data.split("\\r?\\n");//将输入数据按照换行符分行
-        List<String> problem_source = new ArrayList<String>();
-        List<String> problem_target = new ArrayList<String>();
+        List<String> problem_source = new ArrayList<>();
+        List<String> problem_target = new ArrayList<>();
 
         for (String line:lines){
             List<Entity> entities = entityService.selectAllEntities();
@@ -350,9 +279,8 @@ public class TripletController {
                 }
             }
             if (has_source & has_target){
-                addTriplet_in_Batch(triplet_source_ff,triplet_relation,triplet_target);
+                addTriplet_in_Batch(triplet_source_ff,triplet_relation,triplet_target, "network");
             }
-
             if (!has_source){
                 problem_source.add(triplet_source_f);
             }
@@ -367,14 +295,79 @@ public class TripletController {
         JSONObject res = new JSONObject();
         JSONArray prob_src = new JSONArray();
         JSONArray prob_tail = new JSONArray();
-        for (String s:problem_source){
-            prob_src.add(s);
-        }
-        for (String s:problem_target){
-            prob_tail.add(s);
-        }
+        prob_src.addAll(problem_source);
+        prob_tail.addAll(problem_target);
         res.put("head", prob_src);
         res.put("tail", prob_tail);
         return res;
     }
+
+
+    //    @RequestMapping(value = "/l",method = RequestMethod.GET)
+//    public JSONObject linksJson(){
+//        File file = new File("E:\\oneDrive\\桌面\\前端\\network-test\\src\\main\\resources\\static\\link_detail.json");
+//        StringBuilder ans = new StringBuilder();
+//        try {
+//            BufferedReader br = new BufferedReader(new FileReader(file));
+//            String line;
+//
+//            while ((line = br.readLine()) != null) {
+//                if(line.length()!=0)
+//                    ans.append(line);
+//            }
+//        }
+//        catch (Exception e){
+//            System.out.println(e);
+//        }
+//
+//
+//        try {
+//            JSONObject j = JSONObject.parseObject(ans.toString());
+//            System.out.println("取值成功");
+//            return j;
+//        }
+//        catch (Exception e){
+//            System.out.println(e);
+//        }
+//
+//        return null;
+//
+//    }
+
+
+//        @RequestMapping(value = "addtri")
+//        public String addAll(){
+//            String path = "E:\\oneDrive\\桌面\\前端\\network-test\\src\\main\\resources\\static\\link_detail.json";
+//            File file = new File(path);
+//            StringBuilder ans = new StringBuilder();
+//            try {
+//                BufferedReader br = new BufferedReader(new FileReader(file));
+//                String line;
+//
+//                while ((line = br.readLine()) != null) {
+//                    if(line.length()!=0)
+//                        ans.append(line);
+//                }
+//            }
+//            catch (Exception e){
+//                System.out.println(e);
+//            }
+//
+//            //存放整个文档
+//            JSONObject j =  JSONObject.parseObject(ans.toString());
+//
+//            JSONArray items = (JSONArray)j.get("links");
+//
+//            for (Object item : items) {
+//                JSONObject n = (JSONObject) item;
+//                Triplet triplet = new Triplet();
+//                triplet.setSource(n.get("source").toString());
+//                triplet.setValue(n.get("value").toString());
+//                triplet.setTarget(n.get("target").toString());
+////                tripletService.addTriplet(triplet);
+//                System.out.println(triplet);
+//            }
+//
+//            return "插入成功";
+//        }
 }

@@ -72,8 +72,6 @@ public interface EntityMapper {
     @Update("update nodes set node_group = #{node_group} where node_id = #{entity_name}")
     void updateNodeGroup(String entity_name, Integer node_group);
 
-//    @Insert()
-//    void Add_Entity_in_Batch(List<List> input){
-//
-//    }
+    @Select("select entity_label from new_entities")
+    List<String> selectAllLabels();
 }

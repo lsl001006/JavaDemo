@@ -71,5 +71,4 @@ public class TripletServiceImpl implements TripletService {
         tripletMapper.updateNodeSize();//添加三元组后更新node size
     }
 
-
 }
