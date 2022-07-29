@@ -2,33 +2,33 @@ package com.example.network.service;
 
 import com.example.network.model.Entity;
 
+import com.example.network.model.Entity2;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 /**
- * &#064;author:  shanglin
- * &#064;date:  2022/5/12 11:41
+ * &#064;author:  lsl
+ * &#064;date:  2022/7/28 17:10
  * &#064;description:
  */
 @Service
 public interface EntityService {
 
 
-    List<Entity> selectAllEntities();
-    Entity selectById(String id);
+    List<Entity2> selectAllEntities(String category);
+    Entity2 selectById(Integer id);
 
-    List<String> selectEntitiesByLabel(String label);
+    List<String> selectEntitiesByLabel(String label, String category);
 
-    List<String> selectEntityLabels();
+    List<String> selectEntityLabels(String category);
 
-    List<String> selectEntityIds();
+    List<String> selectEntityIds(String category);
 
-    void addEntity(String identity,String name,String label,String chineseName,String englishName,String abbreName);
+    void addEntity(String name, String label, String attrs, String category);
 
-    void editEntity(String identity,String name,String label,String chineseName,String englishName,String abbreName);
+    void editEntity(Integer id,String name,String label,String attrs,String category);
 
-    void deleteEntity(String id);
+    void deleteEntity(Integer id);
 
-    List<String> selectAllLabels();
 }

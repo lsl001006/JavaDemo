@@ -2,9 +2,9 @@ package com.example.network.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.example.network.model.Entity;
-import com.example.network.model.Node;
-import com.example.network.model.Triplet;
+import com.example.network.model.Entity2;
+import com.example.network.model.Node2;
+import com.example.network.model.Triplet2;
 import com.example.network.service.EntityService;
 import com.example.network.service.NodeService;
 import com.example.network.service.TripletService;
@@ -64,30 +64,30 @@ public class TripletController {
         return labelmap.get(label);
     }
 
-
-
     public void checkNodeAndUpdate(String name, String category) {
-        // checkNodeAndUpdate函数重构， 传入参数加入category用于指示所属图谱类别 TODO 未完成全部重构
+        // checkNodeAndUpdate函数重构， 传入参数加入category用于指示所属图谱类别
         //用于检查nodes表中是否存在所需name的node
         //导入entities, nodes 两个表中的全部内容
-        List<Entity> entities = entityService.selectAllEntities();
-        List<Node> nodes = nodeService.selectAllNodes();
+        List<Entity2> entities = entityService.selectAllEntities(category);
+        List<Node2> nodes = nodeService.selectAllNodes(category);
         boolean hasNode = false;
-        for (Entity entity : entities) {
+        Integer node_id = 0;
+        for (Entity2 entity : entities) {
             if (entity.getName().equals(name)) {
                 // 查找nodes表中是否有name这个名称的node
-                for (Node node : nodes) {
+                for (Node2 node : nodes) {
                     if (node.getName().equals(name)) {
                         //若存在，则终止添加操作
                         hasNode = true;
+                        node_id = node.getId();
                         break;
                     }
                 }
                 if (!hasNode) {
                     String label = entity.getLabel();
                     Integer node_group = mapLookUp(label, category);
-                    nodeService.addNode(entity.getName());
-                    nodeService.updateNodeGroup(entity.getName(), node_group);
+                    nodeService.addNode(entity.getName(), category);
+                    nodeService.updateNodeGroup(node_id, node_group);
                 }
                 break;
             }
@@ -96,14 +96,14 @@ public class TripletController {
     }
 
 
-    @RequestMapping(value = "triplets") //测试语句
-    public JSONArray getAllTriples(){
+    @RequestMapping(value = "triplets/{category}") //测试语句
+    public JSONArray getAllTriples(@PathVariable("category") String category) {
 
         JSONArray keyLinks = new JSONArray();
 
-        List<Triplet> triplets = tripletService.selectAll();
+        List<Triplet2> triplets = tripletService.selectAll(category);
 
-        for (Triplet triplet:triplets)
+        for (Triplet2 triplet:triplets)
             keyLinks.add(triplet.toJSON());
         return keyLinks;
     }
@@ -116,16 +116,18 @@ public class TripletController {
         ArrayList<String> source = (ArrayList<String>) triplet.get("source");
         ArrayList<String> target = (ArrayList<String>) triplet.get("target");
         ArrayList<String> relation = (ArrayList<String>) triplet.get("value");
+        ArrayList<String> category = (ArrayList<String>) triplet.get("category");
         String source_name = source.get(1);
         String target_name = target.get(1);
         String connection = relation.get(0);
+        String category_name = category.get(0);
 
         //首先检查source中选择的实体是否在图中存在node,若没有，则新建对应的node
-        checkNodeAndUpdate(source_name, "network");
+        checkNodeAndUpdate(source_name, category_name);
         //其次检查target中选择的实体是否在图中存在node,若没有，则新建对应的node
-        checkNodeAndUpdate(target_name, "network");
+        checkNodeAndUpdate(target_name, category_name);
 
-        tripletService.addTriplet(source_name, connection, target_name);
+        tripletService.addTriplet(source_name, connection, target_name, category_name);
     }
 
 
@@ -137,22 +139,26 @@ public class TripletController {
         ArrayList<String> source = (ArrayList<String>) triplet.get("source");
         ArrayList<String> target = (ArrayList<String>)triplet.get("target");
         ArrayList<String> relation = (ArrayList<String>)triplet.get("value");
+        ArrayList<String> category = (ArrayList<String>) triplet.get("category");
         String source_name = source.get(1);
         String target_name = target.get(1);
         String connection = relation.get(0);
+        String category_name = category.get(0);
 
         tripletService.updateTriplet(Integer.parseInt(triplet.get("id").toString()),
                                     source_name,
                                     connection,
-                                    target_name);
+                                    target_name,
+                                    category_name);
     }
 
     @GetMapping("/selTripletById/{id}")
     public JSONObject selectById(@PathVariable("id") Integer id){
-        Triplet triplet = tripletService.selectById(id);
-        List<Entity> entities = entityService.selectAllEntities();
+        Triplet2 triplet = tripletService.selectById(id);
+        String category = triplet.getCategory();
+        List<Entity2> entities = entityService.selectAllEntities(category);
         String targetLabel="",sourceLabel="";
-        for (Entity entity:entities){
+        for (Entity2 entity:entities){
             if (entity.getName().equals(triplet.source)) sourceLabel=entity.getLabel();
             if (entity.getName().equals(triplet.target)) targetLabel=entity.getLabel();
 
@@ -168,17 +174,18 @@ public class TripletController {
         res.put("source",source);
         res.put("target",target);
         res.put("value",triplet.value);
+        res.put("category",category);
 
         return res;
     }
 
-    @PostMapping("/batchDeleteTriplet")//批量删除三元组 TODO 待完善category参数
+    @PostMapping("/batchDeleteTriplet")//批量删除三元组
     public String delTripletsByIds(@RequestBody Map<String, List<Integer>> ids){
         List<Integer> ids2 = ids.get("ids");
         System.out.println("Triplets to Delete:"+ids2.toString());
         for (int id:ids2){
-            Triplet tri = tripletService.selectById(id);
-            tripletService.deleteById(id, tri.target);
+            Triplet2 tri = tripletService.selectById(id);
+            tripletService.deleteById(id, tri.target, tri.category);
         }
         return "批量删除成功！";
     }
@@ -188,68 +195,63 @@ public class TripletController {
     public String deleteById(@PathVariable("id") Integer id){
     // 用于删除三元组，传入id即可删除对应的三元组
         System.out.println(id);
-        Triplet tri = tripletService.selectById(id);
-        tripletService.deleteById(id, tri.target);
+        Triplet2 tri = tripletService.selectById(id);
+        tripletService.deleteById(id, tri.target, tri.category);
         return "删除成功";
     }
 
-    @GetMapping("/getRelations")
-    public JSONArray getRelations(){
+    @GetMapping("/getRelations/{category}")
+    public JSONArray getRelations(@PathVariable("category") String category){
     // 用于获取所有的关系类型
-        List<String> relations = tripletService.selectRelations();
+        List<String> relations = tripletService.selectRelations(category);
         JSONArray res = new JSONArray();
         for (String s:relations){
             JSONObject jo = new JSONObject();
             jo.put("value",s);
-            jo.put("label",s);
             res.add(jo);
         }
         return res;
     }
 
-    @GetMapping("/triplets/{page}/{size}")
-    public List<Triplet> findAll(@PathVariable("page") Integer page, @PathVariable("size") Integer size){
-        return tripletService.selectPage(page,size);
+    @GetMapping("/triplets/{page}/{size}/{category}")
+    public List<Triplet2> findAll(@PathVariable("page") Integer page, @PathVariable("size") Integer size, @PathVariable("category") String category){
+        return tripletService.selectPage(page,size,category);
     }
 
 
-    @RequestMapping(value = "links")
-    public JSONObject getAllLinks(){
+    @RequestMapping(value = "links/{category}")
+    public JSONObject getAllLinks(@PathVariable("category") String category) {
         // 每次网页刷新和执行的时候调用，用于将数据库中的数据更新到页面中
         JSONObject res = new JSONObject();
-//        JSONObject keyNodes = new JSONObject();
         JSONArray keyNodes = new JSONArray();
         JSONArray keyLinks = new JSONArray();
-        List<Node> nodes = nodeService.selectAllNodes();
-        List<Triplet> triplets = tripletService.selectAll();
-        for (Node n:nodes){
-            int size = n.getSize()/7 + (n.getSize()%7!=0?1:0) ;
 
+        List<Node2> nodes = nodeService.selectAllNodes(category);
+        List<Triplet2> triplets = tripletService.selectAll(category);
+        for (Node2 n:nodes){
+            int size = n.getSize()/7 + (n.getSize()%7!=0?1:0) ;
             n.setSize(8 + size*5);
             keyNodes.add(n.toJSON());
-
         }
-        for (Triplet triplet:triplets)
+        for (Triplet2 triplet:triplets)
             keyLinks.add(triplet.toJSON());
         res.put("nodes",keyNodes);
         res.put("links",keyLinks);
         return res;
     }
 
-
     public void addTriplet_in_Batch(String triplet_source,String triplet_relation,String triplet_target, String category){
         // 批量导入三元组
-
         //首先检查source中选择的实体是否在图中存在node,若没有，则新建对应的node
         checkNodeAndUpdate(triplet_source, category);
         //其次检查target中选择的实体是否在图中存在node,若没有，则新建对应的node
         checkNodeAndUpdate(triplet_target, category);
-
-        tripletService.addTriplet(triplet_source, triplet_relation, triplet_target);
+        tripletService.addTriplet(triplet_source,triplet_relation,triplet_target,category);
     }
-    @PostMapping("/triplet/upload")
-    public JSONObject getUpload_triplet_batch(MultipartFile file) throws IOException {
-        // TODO 传入category参数，用于区分三元组的图谱类别
+
+    @PostMapping("/triplet/upload/{category}")
+    public JSONObject getUpload_triplet_batch(MultipartFile file, @PathVariable("category") String category) throws IOException {
+        // 传入category参数，用于区分三元组的图谱类别
         InputStream ip = file.getInputStream();
         byte[] b = new byte[ip.available()];//available()方法可以一次获取全部长度
         ip.read(b);//把读的内容存入字节数组b中
@@ -260,8 +262,7 @@ public class TripletController {
         List<String> problem_target = new ArrayList<>();
 
         for (String line:lines){
-            List<Entity> entities = entityService.selectAllEntities();
-
+            List<Entity2> entities = entityService.selectAllEntities(category);
             List<String> a = Arrays.asList(line.split(","));//将数据转换为list，并根据"，"切割
             String triplet_source = a.get(0);
             String triplet_source_f = triplet_source.replaceAll("(\\r\\n|\\n|\\\\n|\\s)", "");
@@ -270,7 +271,7 @@ public class TripletController {
             String triplet_target = a.get(2);
             boolean has_source = false;
             boolean has_target = false;
-            for (Entity entity:entities){
+            for (Entity2 entity:entities){
                 if (entity.getName().equals(triplet_source_ff)){
                     has_source = true;
                 }
@@ -279,7 +280,7 @@ public class TripletController {
                 }
             }
             if (has_source & has_target){
-                addTriplet_in_Batch(triplet_source_ff,triplet_relation,triplet_target, "network");
+                addTriplet_in_Batch(triplet_source_ff,triplet_relation,triplet_target, category);
             }
             if (!has_source){
                 problem_source.add(triplet_source_f);
@@ -360,7 +361,7 @@ public class TripletController {
 //
 //            for (Object item : items) {
 //                JSONObject n = (JSONObject) item;
-//                Triplet triplet = new Triplet();
+//                Triplet2 triplet = new Triplet2();
 //                triplet.setSource(n.get("source").toString());
 //                triplet.setValue(n.get("value").toString());
 //                triplet.setTarget(n.get("target").toString());

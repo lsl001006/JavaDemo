@@ -6,20 +6,20 @@ import lombok.Data;
 
 /**
  * @author lsl
- * @date 2022/7/27 15:34
- * @description
+ * &#064;date  2022/7/27 15:34
+ * &#064;description
  */
 @Data
 public class Node2 {
 
-    public String id;
+    public Integer id;
 
     public String name;
 
-    public int group;
+    public Integer group;
 
     public  String category;
-    private int size;
+    private Integer size;
 
     public JSONObject toJSON(){
         JSONObject ans = new JSONObject();

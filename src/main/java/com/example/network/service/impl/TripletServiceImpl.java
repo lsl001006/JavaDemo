@@ -1,21 +1,22 @@
 package com.example.network.service.impl;
 
+import com.example.network.mapper.NodeMapper;
 import com.example.network.mapper.TripletMapper;
 import com.example.network.model.Triplet;
+import com.example.network.model.Triplet2;
 import com.example.network.service.TripletService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
 
 /**
- * @author: lishanglin
- * @date: 2022/7/12 19:04
- * @description:
+ * &#064;author:  lsl
+ * &#064;date:  2022/7/12 19:04
+ * &#064;description:
  */
 @Service
 public class TripletServiceImpl implements TripletService {
@@ -23,52 +24,55 @@ public class TripletServiceImpl implements TripletService {
     @Autowired
     private TripletMapper tripletMapper;
 
+    @Autowired
+    private NodeMapper nodeMapper;
+
     @Override
-    public List<Triplet> selectAll() {
-        return tripletMapper.selectAll();
+    public List<Triplet2> selectAll(String category) {
+        return tripletMapper.selectAll(category);
     }
 
     @Override
-    public List<Triplet> selectPage(int pageNum, int pageSize) {
+    public List<Triplet2> selectPage(int pageNum, int pageSize, String category) {
         PageHelper.startPage(pageNum,pageSize);
-        List<Triplet> triplets = tripletMapper.selectAll();
-        PageInfo<Triplet> pageInfo = new PageInfo(triplets);
+        List<Triplet2> triplets = tripletMapper.selectAll(category);
+        PageInfo<Triplet2> pageInfo = new PageInfo(triplets);
         System.out.println("selectPage");
         return pageInfo.getList();
     }
 
     @Override
-    public List<Triplet> selectByEntity(String entityName) {
-        return tripletMapper.selectByEntity(entityName);
+    public List<Triplet2> selectByEntity(String entityName, String category) {
+        return tripletMapper.selectByEntity(entityName, category);
     }
 
     @Override
-    public Triplet selectById(int triplet_id) {
+    public Triplet2 selectById(int triplet_id) {
         return tripletMapper.selectById(triplet_id);
     }
 
     @Override
-    public void updateTriplet(int id, String source, String value, String target) {
-        tripletMapper.updateTriplet(id,source,value,target);
+    public void updateTriplet(int id, String source, String value, String target, String category) {
+        tripletMapper.updateTriplet(id, source, value, target, category);
         System.out.println(source+"修改成功");
     }
 
     @Override
-    public void deleteById(int triplet_id, String triplet_target) {
+    public void deleteById(int triplet_id, String triplet_target, String category) {
         tripletMapper.deleteById(triplet_id);
-        tripletMapper.delNode(triplet_target);
-        tripletMapper.updateNodeSize();//添加三元组后更新node size
+        nodeMapper.delNode(triplet_target, category);
+        nodeMapper.updateNodeSize(category);//添加三元组后更新node size
     }
 
     @Override
-    public List<String> selectRelations() {
-        return tripletMapper.selectRelations();
+    public List<String> selectRelations(String category) {
+        return tripletMapper.selectRelations(category);
     }
 
     @Override
-    public void addTriplet(String a, String b, String c) {
-        tripletMapper.addTriplet(a,b,c);
-        tripletMapper.updateNodeSize();//添加三元组后更新node size
+    public void addTriplet(String source, String value, String target, String category) {
+        tripletMapper.addTriplet(source,value,target,category);
+        nodeMapper.updateNodeSize(category);//添加三元组后更新node size
     }
 
 }

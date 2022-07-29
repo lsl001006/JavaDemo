@@ -11,7 +11,7 @@ import lombok.Data;
 @Data
 
 public class Triplet2 {
-    public int id;
+    public Integer id;
 
     public String category;
 
@@ -23,7 +23,7 @@ public class Triplet2 {
 
     public JSONObject toJSON(){
         JSONObject ans = new JSONObject();
-        ans.put("category", this.source);
+        ans.put("category", this.category);
         ans.put("source",this.source);
         ans.put("value",this.value);
         ans.put("target",this.target);

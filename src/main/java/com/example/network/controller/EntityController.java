@@ -3,6 +3,7 @@ package com.example.network.controller;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.example.network.model.Entity;
+import com.example.network.model.Entity2;
 import com.example.network.model.Node;
 import com.example.network.model.Triplet;
 import com.example.network.service.EntityService;
@@ -17,9 +18,9 @@ import java.io.InputStream;
 import java.util.*;
 
 /**
- * @author: modige
- * @date: 2022/5/12 23:17
- * @description:
+ * &#064;author:  lsl
+ * &#064;date:  2022/7/28 13:17
+ * &#064;description:  实体控制器
  */
 @RestController
 public class EntityController {
@@ -28,128 +29,103 @@ public class EntityController {
     @Autowired
     private TripletService tripletService;
 
-    @GetMapping(value = "selectByLabel/{label}")//以JSONArray形式返回实体列表 TODO
-    public List<String> getAllEntities(@PathVariable("label") String label){
-        List<String> entityNames = entityService.selectEntitiesByLabel(label);
+    @GetMapping(value = "selectByLabel/{label}/{category}")//以JSONArray形式返回实体列表
+    public List<String> getAllEntities(@PathVariable("label") String label, @PathVariable("category") String category) {
+        List<String> entityNames = entityService.selectEntitiesByLabel(label, category);
         return entityNames;
     }
 
-    @GetMapping(value = "selectEntityLabels")//以JSONArray形式返回实体列表 TODO
-    public JSONArray getEntityLabels(){
+    @GetMapping(value = "selectEntityLabels/{category}")//以JSONArray形式返回实体列表
+    public JSONArray getEntityLabels(@PathVariable("category") String category) {
 
-        List<String> entityLabels = entityService.selectEntityLabels();
-
+        List<String> entityLabels = entityService.selectEntityLabels(category);
         JSONArray res = new JSONArray();
         for (String s:entityLabels){
             JSONObject jo = new JSONObject();
-            jo.put("value",s);
             jo.put("label",s);
             res.add(jo);
         }
         return res;
     }
 
-    @GetMapping(value = "getEntitiesByLabel")//以JSONArray形式返回实体列表 TODO
-    public JSONArray getEntitiesByLabel(){
-        List<String> entityLabels = entityService.selectEntityLabels();
+    @GetMapping(value = "getEntitiesByLabel/{category}")//以JSONArray形式返回实体列表
+    public JSONArray getEntitiesByLabel(@PathVariable("category") String category) {
+        List<String> entityLabels = entityService.selectEntityLabels(category);
         JSONArray res = new JSONArray();
 
         for (String s:entityLabels){
-            List<String> entityNames = entityService.selectEntitiesByLabel(s);
+            List<String> entityNames = entityService.selectEntitiesByLabel(s, category);
             JSONObject item = new JSONObject();
             item.put("value",s);
             item.put("label",s);
             JSONArray entityNamesArray = new JSONArray();
             for (String entity_name:entityNames){
                 JSONObject entityJson = new JSONObject();
-
-
                 entityJson.put("value",entity_name);
-                entityJson.put("label",entity_name);
                 entityNamesArray.add(entityJson);
-
             }
             item.put("children",entityNamesArray);
             res.add(item);
-
         }
-
         return res;
     }
 
-    @GetMapping(value = "/entity/{id}")//以JSONArray形式返回实体列表 TODO
-    public JSONObject getEntityById(@PathVariable("id") String id){
-        Entity entity = entityService.selectById(id);
-        List<Triplet> triplets =tripletService.selectByEntity(entity.getName());
+    @GetMapping(value = "/entity/{id}")//以JSONArray形式返回实体列表
+    public JSONObject getEntityById(@PathVariable("id") Integer id){
+        Entity2 entity = entityService.selectById(id);
         JSONObject res = new JSONObject();
-        res.put("entity",entity);
-        res.put("triplets",triplets);
-
+        res.put("entity",entity.toJSON());
         return res;
     }
 
     @GetMapping(value = "/delEntity/{id}")//
-    public String delEntityById(@PathVariable("id") String id){
+    public String delEntityById(@PathVariable("id") Integer id){
         entityService.deleteEntity(id);
-
         return "删除成功";
     }
 
-    @RequestMapping(value = "test")//以JSONArray形式返回实体列表
-    public List<Entity> test(){
-        List<Entity> entities = entityService.selectAllEntities();
-
-        return entities;
+    @RequestMapping(value = "test/{category}")//以JSONArray形式返回实体列表
+    public List<Entity2> test(@PathVariable("category") String category){
+        return entityService.selectAllEntities(category);
     }
 
-    @RequestMapping(value = "entities")//以JSONArray形式返回实体列表
-    public JSONArray getAllEntities(){
-        List<Entity> entities = entityService.selectAllEntities();
-        JSONArray res = new JSONArray();
-        for (Entity e:entities)
-            res.add(e);
+    @RequestMapping(value = "entities/{category}")//以JSONArray形式返回实体列表
+    public JSONObject getAllEntities(@PathVariable("category") String category){
+        List<Entity2> entities = entityService.selectAllEntities(category);
+        JSONObject res = new JSONObject();
+        for (Entity2 entity:entities){
+            res.put(entity.getName(), entity.toJSON());
+        }
         return res;
     }
-    @RequestMapping(value = "/e",method = RequestMethod.GET)//以JSONObject返回实体列表 TODO
-    public JSONObject entitiesJson(){
-        List<Entity> entities = entityService.selectAllEntities();
+    @RequestMapping(value = "/e/{category}",method = RequestMethod.GET)
+    public JSONObject entitiesJson(@PathVariable("category") String category){
+        List<Entity2> entities = entityService.selectAllEntities(category);
         JSONObject res = new JSONObject();
-        for (Entity e:entities)
-            res.put(e.getName(),e);
+        for (Entity2 e:entities)
+            res.put(e.getName(),e.toJSON());
         return res;
     }
     @PostMapping("/editEntity")
-    public String editEntity(@RequestBody Map<String,Entity> form){
-        Entity entity = form.get("form");
+    public String editEntity(@RequestBody Map<String,Entity2> form){
+        Entity2 entity = form.get("form");
         System.out.println(entity);
-        entityService.editEntity(entity.getIdentity(),
+        entityService.editEntity(entity.getId(),
                                  entity.getName(),
                                  entity.getLabel(),
-                                 entity.getChineseName(),
-                                 entity.getEnglishName(),
-                                 entity.getAbbreName());
+                                 entity.getAttrs(),
+                                 entity.getCategory());
         return "success";
     }
 
     @PostMapping("/addEntity")
-    public String addEntity(@RequestBody Map<String,Entity> form){
-        Entity entity = form.get("form");
-
-        List<String> existEntityIds = entityService.selectEntityIds();
-        int maxId = 0;
-        for (String s:existEntityIds) {
-            maxId = Math.max(Integer.parseInt(s), maxId);
-        }
-
-        entity.setIdentity(""+(maxId+1));
+    public String addEntity(@RequestBody Map<String,Entity2> form){
+        Entity2 entity = form.get("form");
         System.out.println(entity);
-        entityService.addEntity(entity.getIdentity(),
-                                entity.getName(),
+        entityService.addEntity(entity.getName(),
                                 entity.getLabel(),
-                                entity.getChineseName(),
-                                entity.getEnglishName(),
-                                entity.getAbbreName());
-
+                                entity.getAttrs(),
+                                entity.getCategory());
         return "success";
     }
 
@@ -163,29 +139,16 @@ public class EntityController {
         String[] lines = input_data.split("\\r?\\n");//将输入数据按照换行符分行
         for (String line:lines){
             List<String> a = Arrays.asList(line.split(","));//将数据转换为list，并根据"，"切割
-            List<String> existEntityIds = entityService.selectEntityIds();
-            int maxId = 0;
-            for (String s:existEntityIds) {
-                maxId = Math.max(Integer.parseInt(s), maxId);
-            }
-            String entity_id = Integer.toString(maxId+1);
+            List<String> existEntityIds = entityService.selectEntityIds("network");
             String entity_name = a.get(0);
             String entity_name_f = entity_name.replaceAll("(\\r\\n|\\n|\\\\n|\\s)", "");
             String entity_label = a.get(1);
-            String entity_chinese = a.get(2);
-            String entity_english = a.get(3);
-            String entity_abbre = a.get(4);
-            System.out.println(a.get(0));
-            entityService.addEntity(entity_id,entity_name_f,entity_label,entity_chinese,entity_english,entity_abbre);
+            String attrs = a.get(2);
+            String category = a.get(3);
+            entityService.addEntity(entity_name_f,entity_label,attrs,category);
         }
-//        entityService.Add_Entity_in_Batch(result);
-//暂定返回添加数据库失败的三元组，具体数据类型、封装格式自己决
     }
 
-//    public String Add_Entity_in_Batch(List input){
-//        System.out.println(getUpload);
-//        return "success";
-//    }
 }
 
 

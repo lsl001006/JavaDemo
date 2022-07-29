@@ -4,23 +4,21 @@ import com.alibaba.fastjson.JSONObject;
 import lombok.Data;
 
 /**
- * @author: lsl
- * @date: 2022/7/27 15:24
- * @description:
+ * &#064;author:  lsl
+ * &#064;date:  2022/7/27 15:24
+ * &#064;description:
  */
 @Data
 public class Entity2 {
 
-    private String id;
+    private Integer id;
     private String name;
     private String label;
-
     private String category;
+    private String attrs;
 
-    private JSONObject attrs;
 
-
-    public Entity2(String id, String name, String label, String category, JSONObject attrs){
+    public Entity2(Integer id, String name, String label, String category, String attrs){
         this.setId(id);
         this.setName(name);
         this.setLabel(label);
@@ -30,13 +28,13 @@ public class Entity2 {
 
     public JSONObject toJSON(){
         JSONObject ans = new JSONObject();
-        ans.put("id",Integer.parseInt(this.id));
+        ans.put("id",this.id);
         ans.put("name",this.name);
         ans.put("label",this.label);
         ans.put("category",this.category);
-        ans.put("attrs",this.attrs);
+        JSONObject attrs = JSONObject.parseObject(this.attrs);
+        ans.put("attrs",attrs);
         return ans;
     }
-
 
 }
