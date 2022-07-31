@@ -139,7 +139,6 @@ public class EntityController {
         String[] lines = input_data.split("\\r?\\n");//将输入数据按照换行符分行
         for (String line:lines){
             List<String> a = Arrays.asList(line.split(","));//将数据转换为list，并根据"，"切割
-            List<String> existEntityIds = entityService.selectEntityIds("network");
             String entity_name = a.get(0);
             String entity_name_f = entity_name.replaceAll("(\\r\\n|\\n|\\\\n|\\s)", "");
             String entity_label = a.get(1);
