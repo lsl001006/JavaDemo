@@ -249,8 +249,8 @@ public class TripletController {
         tripletService.addTriplet(triplet_source,triplet_relation,triplet_target,category);
     }
 
-    @PostMapping("/triplet/upload/{category}")
-    public JSONObject getUpload_triplet_batch(MultipartFile file, @PathVariable("category") String category) throws IOException {
+    @PostMapping("/triplet/upload")
+    public JSONObject getUpload_triplet_batch(MultipartFile file) throws IOException {
         // 传入category参数，用于区分三元组的图谱类别
         InputStream ip = file.getInputStream();
         byte[] b = new byte[ip.available()];//available()方法可以一次获取全部长度
@@ -262,13 +262,14 @@ public class TripletController {
         List<String> problem_target = new ArrayList<>();
 
         for (String line:lines){
-            List<Entity2> entities = entityService.selectAllEntities(category);
             List<String> a = Arrays.asList(line.split(","));//将数据转换为list，并根据"，"切割
             String triplet_source = a.get(0);
-            String triplet_source_f = triplet_source.replaceAll("(\\r\\n|\\n|\\\\n|\\s)", "");
-            String triplet_source_ff = triplet_source_f.replaceAll("\\p{C}", "");
             String triplet_relation = a.get(1);
             String triplet_target = a.get(2);
+            String category = a.get(3);
+            String triplet_source_f = triplet_source.replaceAll("(\\r\\n|\\n|\\\\n|\\s)", "");
+            String triplet_source_ff = triplet_source_f.replaceAll("\\p{C}", "");
+            List<Entity2> entities = entityService.selectAllEntities(category);
             boolean has_source = false;
             boolean has_target = false;
             for (Entity2 entity:entities){
