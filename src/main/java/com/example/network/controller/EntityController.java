@@ -64,7 +64,7 @@ public class EntityController {
         Map<String, Integer> entityLabelMap = readLabelJson(category);
         JSONObject jsonObject = new JSONObject();
         for (String entity : entityLabelMap.keySet()) {
-            jsonObject.put(entity, entityLabelMap.get(entity));
+            jsonObject.put(entityLabelMap.get(entity).toString(), entity);
         }
 //        List<String> entityLabels = entityService.selectEntityLabels(category);
 //        JSONArray res = new JSONArray();
