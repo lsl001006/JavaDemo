@@ -13,8 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.*;
 
 /**
@@ -29,6 +28,31 @@ public class EntityController {
     @Autowired
     private TripletService tripletService;
 
+    public Map<String, Integer> readLabelJson(String category){
+        String readString;
+        File jsonFile = new File("src/main/resources/data/nodeLabelMap.json");
+        try {
+            FileReader fileReader = new FileReader(jsonFile);
+            BufferedReader reader = new BufferedReader(fileReader);
+            StringBuilder sb = new StringBuilder();
+            while (true) {
+                int ch = reader.read();
+                if (ch != -1) {
+                    sb.append((char) ch);
+                } else {
+                    break;
+                }
+            }
+            fileReader.close();
+            reader.close();
+            readString = sb.toString();
+        } catch (IOException e) {
+            readString = "";
+        }
+        JSONObject jsonObject = JSONObject.parseObject(readString);
+        return jsonObject.get(category) == null ? new HashMap<>() : (Map<String, Integer>) jsonObject.get(category);
+    }
+
     @GetMapping(value = "selectByLabel/{label}/{category}")//以JSONArray形式返回实体列表
     public List<String> getAllEntities(@PathVariable("label") String label, @PathVariable("category") String category) {
         List<String> entityNames = entityService.selectEntitiesByLabel(label, category);
@@ -36,16 +60,20 @@ public class EntityController {
     }
 
     @GetMapping(value = "selectEntityLabels/{category}")//以JSONArray形式返回实体列表
-    public JSONArray getEntityLabels(@PathVariable("category") String category) {
-
-        List<String> entityLabels = entityService.selectEntityLabels(category);
-        JSONArray res = new JSONArray();
-        for (String s:entityLabels){
-            JSONObject jo = new JSONObject();
-            jo.put("label",s);
-            res.add(jo);
+    public JSONObject getEntityLabels(@PathVariable("category") String category) {
+        Map<String, Integer> entityLabelMap = readLabelJson(category);
+        JSONObject jsonObject = new JSONObject();
+        for (String entity : entityLabelMap.keySet()) {
+            jsonObject.put(entity, entityLabelMap.get(entity));
         }
-        return res;
+//        List<String> entityLabels = entityService.selectEntityLabels(category);
+//        JSONArray res = new JSONArray();
+//        for (String s:entityLabels){
+//            JSONObject jo = new JSONObject();
+//            jo.put("label",s);
+//            res.add(jo);
+//        }
+        return jsonObject;
     }
 
     @GetMapping(value = "getEntitiesByLabel/{category}")//以JSONArray形式返回实体列表
@@ -100,6 +128,7 @@ public class EntityController {
     }
     @RequestMapping(value = "/e/{category}",method = RequestMethod.GET)
     public JSONObject entitiesJson(@PathVariable("category") String category){
+        System.out.println("This is a tip");
         List<Entity2> entities = entityService.selectAllEntities(category);
         JSONObject res = new JSONObject();
         for (Entity2 e:entities)
