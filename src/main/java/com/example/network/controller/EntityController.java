@@ -2,10 +2,7 @@ package com.example.network.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.example.network.model.Entity;
-import com.example.network.model.Entity2;
-import com.example.network.model.Node;
-import com.example.network.model.Triplet;
+import com.example.network.model.*;
 import com.example.network.service.EntityService;
 import com.example.network.service.TripletService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,8 +98,10 @@ public class EntityController {
     @GetMapping(value = "/entity/{id}")//以JSONArray形式返回实体列表
     public JSONObject getEntityById(@PathVariable("id") Integer id){
         Entity2 entity = entityService.selectById(id);
+        List<Triplet2> triplets = tripletService.selectByEntity(entity.getName(), entity.getCategory());
         JSONObject res = new JSONObject();
         res.put("entity",entity.toJSON());
+        res.put("triplets", triplets);
         return res;
     }
 
