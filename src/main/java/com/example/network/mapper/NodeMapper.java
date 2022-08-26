@@ -26,7 +26,7 @@ public interface NodeMapper {
             @Result(column = "category", property = "category",jdbcType = JdbcType.VARCHAR)})
     List<Node2> selectAllNodes(String category);
 
-    @Insert("insert into new_nodes values(NULL, #{node_name}), 0, 1, #{category}")
+    @Insert("insert into new_nodes values(NULL, #{node_name}, 0, 1, #{category})")
     void addNode(String node_name, String category);
 
     @Update("update new_nodes set node_group = #{node_group} where node_id = #{id}")
