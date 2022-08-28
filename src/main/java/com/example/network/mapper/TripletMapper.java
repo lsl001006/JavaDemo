@@ -56,6 +56,4 @@ public interface TripletMapper {
     @Insert("insert into new_triplets values(NULL, #{source},#{value},#{target},#{category})")
     void addTriplet(String source,String value,String target,String category);
 
-
-
 }

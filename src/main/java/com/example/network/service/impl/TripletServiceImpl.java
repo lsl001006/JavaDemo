@@ -2,8 +2,8 @@ package com.example.network.service.impl;
 
 import com.example.network.mapper.NodeMapper;
 import com.example.network.mapper.TripletMapper;
-import com.example.network.model.Triplet;
 import com.example.network.model.Triplet2;
+import com.example.network.controller.NodeController;
 import com.example.network.service.TripletService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -26,6 +26,9 @@ public class TripletServiceImpl implements TripletService {
 
     @Autowired
     private NodeMapper nodeMapper;
+
+    @Autowired
+    private NodeController nodeController;
 
     @Override
     public List<Triplet2> selectAll(String category) {
@@ -60,7 +63,7 @@ public class TripletServiceImpl implements TripletService {
     @Override
     public void deleteById(int triplet_id, String triplet_target, String category) {
         tripletMapper.deleteById(triplet_id);
-        nodeMapper.delNode(triplet_target, category);
+        nodeController.delNode(triplet_target, category);
         nodeMapper.updateNodeSize(category);//添加三元组后更新node size
     }
 
