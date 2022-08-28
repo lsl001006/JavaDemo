@@ -45,7 +45,9 @@ public interface TripletMapper {
     @Select("select distinct triplet_relation as relation from new_triplets where category=#{category}")
     List<String> selectRelations(String category);
 
-    @Update("update new_triplets set values(#{id}, #{source}, #{value}, #{target}, #{category}) where triplet_id = #{id}")
+    @Update("update new_triplets set triplet_id = #{id}," +
+            " triplet_source = #{source}, triplet_relation = #{value}," +
+            " triplet_target = #{target}, category = #{category} where triplet_id = #{id}")
     void updateTriplet(int id, String source, String value, String target, String category);
 
     @Delete("delete from new_triplets where triplet_id = #{triplet_id}")

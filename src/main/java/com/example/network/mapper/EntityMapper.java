@@ -38,6 +38,9 @@ public interface EntityMapper {
     @Select("select distinct entity_label from new_entities where category=#{category}" )
     List<String> selectEntityLabels(String category);
 
+    @Select("select distinct category from new_entities")
+    List<String> selectAllCategories();
+
 
     @Select("select * from new_entities where entity_id = #{entity_id}" )
     @Results(value = {

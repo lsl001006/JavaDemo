@@ -165,17 +165,36 @@ public class EntityController {
         String input_data = new String(b);
 
         String[] lines = input_data.split("\\r?\\n");//将输入数据按照换行符分行
-        for (String line:lines){
+        List<String> property = Arrays.asList(lines[0].split(","));
+
+        for (int j=1; j<lines.length; j++){
+            String line = lines[j];
             List<String> a = Arrays.asList(line.split(","));//将数据转换为list，并根据"，"切割
             String entity_name = a.get(0);
             String entity_name_f = entity_name.replaceAll("(\\r\\n|\\n|\\\\n|\\s)", "");
             String entity_label = a.get(1);
-            String attrs = a.get(2);
-            String category = a.get(3);
-            entityService.addEntity(entity_name_f,entity_label,attrs,category);
+            String category = a.get(2);
+            JSONObject attrs = new JSONObject();
+            for (int i = 3; i < a.size(); i++){
+                attrs.put(property.get(i), a.get(i));
+            }
+            String str_attrs = attrs.toJSONString();
+            entityService.addEntity(entity_name_f,entity_label,str_attrs,category);
         }
     }
 
+    @RequestMapping(value = "/categories",method = RequestMethod.GET)
+    public ArrayList<Map> allCategories() {
+        List<String> categories = entityService.selectAllCategories();
+        ArrayList<Map> ret = new ArrayList<>();
+        for (String c : categories) {
+            Map<String, String> m = new HashMap<>();
+            m.put("label",c);
+            m.put("value",c);
+            ret.add(m);
+        }
+        return ret;
+    }
 }
 
 

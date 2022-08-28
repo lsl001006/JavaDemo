@@ -23,6 +23,8 @@ public interface EntityService {
 
     List<String> selectEntityLabels(String category);
 
+    List<String> selectAllCategories();
+
     List<String> selectEntityIds(String category);
 
     void addEntity(String name, String label, String attrs, String category);

@@ -44,6 +44,10 @@ public class EntityServiceImpl implements EntityService {
     }
 
     @Override
+    public List<String> selectAllCategories(){
+        return entityMapper.selectAllCategories();
+    }
+    @Override
     public List<String> selectEntityIds(String category) {
         return entityMapper.selectEntityIds(category);
     }
